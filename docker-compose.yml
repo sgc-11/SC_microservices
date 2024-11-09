@@ -1,42 +1,48 @@
 //docker-compose.yml
 
 services:
-  api_gateway:
-    build: ./http-api-gateway
+  api-gateway:
+    build: ./api_gateway
     ports:
       - "3000:3000"
     volumes:
-      - ./http-api-gateway/src:/usr/src/app/src
+      - ./api_gateway/src:/usr/src/app/src
     command: npm run start:dev
     environment:
       - PORT=3000
 
-  users_microservice:
-    build: ./users-microservice
+  bookings_microservice:
+    build: ./bookings-microservice
     volumes:
-      - ./users-microservice/src:/usr/src/app/src
+      - ./bookings-microservice/src:/usr/src/app/src
     command: npm run start:dev
 
-  payments_microservice:
-    build: ./payments-microservice
+
+  orders_microservice:
+    build: ./orders-microservice
     volumes:
-      - ./payments-microservice/src:/usr/src/app/src
+      - ./orders-microservice/src:/usr/src/app/src
     command: npm run start:dev
 
   nats:
     image: nats
     ports:
-      - 4222:4222
+      - "4222:4222"
 
-  mysql_db:
-    image: mysql
-    ports:
-      - "3306:3306"
+  postgres:
+    image: postgres
     environment:
-      - MYSQL_ROOT_PASSWORD=root_password_123
-      - MYSQL_DATABASE=nestjs_db
-      - MYSQL_USER=testuser
-      - MYSQL_PASSWORD=testuser123
-      - MYSQL_TCP_PORT=3306
+      - POSTGRES_USER=testuser
+      - POSTGRES_PASSWORD=testuser123
+      - POSTGRES_DB=orders_db
+    ports:
+      - "5432:5432"
+
+  sqlite_db:
+    image: nouchka/sqlite3
+    volumes:
+      - ./orders-microservice/src:/usr/src/app
+    command: sqlite3 /usr/src/app/orders.db
+
 
 
